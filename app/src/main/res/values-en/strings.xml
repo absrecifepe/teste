@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_title">Your photo, typed in ASCII</string>
+    <string name="empty_body">Pick a photo and the app creates a video where it appears character by character, as if it were being typed in a terminal.</string>
+    <string name="pick_photo">Pick a photo</string>
+    <string name="change_photo">Change photo</string>
+    <string name="preview_desc">ASCII preview of the photo</string>
+
+    <string name="generate">Create video</string>
+    <string name="exporting">Creating video… %1$d%%</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save to gallery</string>
+    <string name="share">Share</string>
+    <string name="share_title">Share video</string>
+
+    <string name="setting_detail">Detail: %1$d columns</string>
+    <string name="setting_duration">Typing duration: %1$d s</string>
+    <string name="setting_style">Style</string>
+    <string name="setting_charset">Characters</string>
+    <string name="setting_invert">Invert light/dark</string>
+
+    <string name="style_matrix">Matrix</string>
+    <string name="style_terminal">Terminal</string>
+    <string name="style_color">Color</string>
+    <string name="style_amber">Amber</string>
+    <string name="style_paper">Paper</string>
+
+    <string name="charset_classic">Classic</string>
+    <string name="charset_detailed">Detailed</string>
+    <string name="charset_blocks">Blocks</string>
+    <string name="charset_binary">Binary</string>
+
+    <string name="msg_load_error">Could not open this image.</string>
+    <string name="msg_export_error">Error creating the video. Try fewer columns.</string>
+    <string name="msg_saved">Video saved to Movies/ASCII Typer</string>
+    <string name="msg_save_error">Could not save the video.</string>
+</resources>

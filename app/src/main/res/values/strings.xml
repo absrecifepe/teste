@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ASCII Typer</string>
+
+    <string name="empty_title">Sua foto, digitada em ASCII</string>
+    <string name="empty_body">Escolha uma foto e o app cria um vídeo em que ela vai surgindo caractere por caractere, como se estivesse sendo digitada num terminal.</string>
+    <string name="pick_photo">Escolher foto</string>
+    <string name="change_photo">Trocar foto</string>
+    <string name="preview_desc">Pré-visualização da foto em ASCII</string>
+
+    <string name="generate">Gerar vídeo</string>
+    <string name="exporting">Gerando vídeo… %1$d%%</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save">Salvar na galeria</string>
+    <string name="share">Compartilhar</string>
+    <string name="share_title">Compartilhar vídeo</string>
+
+    <string name="setting_detail">Detalhe: %1$d colunas</string>
+    <string name="setting_duration">Duração da digitação: %1$d s</string>
+    <string name="setting_style">Estilo</string>
+    <string name="setting_charset">Caracteres</string>
+    <string name="setting_invert">Inverter claro/escuro</string>
+
+    <string name="style_matrix">Matrix</string>
+    <string name="style_terminal">Terminal</string>
+    <string name="style_color">Colorido</string>
+    <string name="style_amber">Âmbar</string>
+    <string name="style_paper">Papel</string>
+
+    <string name="charset_classic">Clássico</string>
+    <string name="charset_detailed">Detalhado</string>
+    <string name="charset_blocks">Blocos</string>
+    <string name="charset_binary">Binário</string>
+
+    <string name="msg_load_error">Não foi possível abrir essa imagem.</string>
+    <string name="msg_export_error">Erro ao gerar o vídeo. Tente com menos colunas.</string>
+    <string name="msg_saved">Vídeo salvo em Filmes/ASCII Typer</string>
+    <string name="msg_save_error">Não foi possível salvar o vídeo.</string>
+</resources>
