@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ASCII Typer</string>
+    <string name="app_name" translatable="false">ASCII Typer</string>
 
     <string name="empty_title">Sua foto, digitada em ASCII</string>
     <string name="empty_body">Escolha uma foto e o app cria um vídeo em que ela vai surgindo caractere por caractere, como se estivesse sendo digitada num terminal.</string>
