@@ -23,7 +23,7 @@ val testAdmobAppId = "ca-app-pub-3940256099942544~3347511713"
 val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
 // ID real do app no AdMob (não é segredo: fica visível dentro do APK publicado).
 val releaseAdmobAppId = signingValue("admobAppId", "ADMOB_APP_ID") ?: "ca-app-pub-3972359571836563~5329846042"
-val releaseInterstitialId = signingValue("admobInterstitialId", "ADMOB_INTERSTITIAL_ID") ?: testInterstitialId
+val releaseInterstitialId = signingValue("admobInterstitialId", "ADMOB_INTERSTITIAL_ID") ?: "ca-app-pub-3972359571836563/6946180042"
 if (releaseInterstitialId == testInterstitialId) {
     logger.warn("AdMob: release usando bloco intersticial de TESTE (sem receita). Configure ADMOB_INTERSTITIAL_ID.")
 }
