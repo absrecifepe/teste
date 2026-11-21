@@ -15,10 +15,24 @@ como se um hacker estivesse digitando no terminal.
 ✔ Ajuste o nível de detalhe e a velocidade da digitação
 ✔ Vídeo MP4 em alta qualidade, pronto para Reels, TikTok, Status e Stories
 ✔ Salve na galeria ou compartilhe com um toque
-✔ 100% no seu celular: sem cadastro, sem internet, sem anúncios, suas fotos não saem do aparelho
+✔ Processado no seu celular: sem cadastro, suas fotos não saem do aparelho
+
+App gratuito, mantido por anúncios.
 
 **Categoria:** Fotografia (ou Vídeo players e editores)
 
 **Classificação de conteúdo:** Livre
 
-**Segurança dos dados:** Nenhum dado coletado; nenhum dado compartilhado.
+**Contém anúncios:** Sim
+
+**Segurança dos dados** (por causa do SDK do AdMob — confira a orientação atual do Google em
+<https://developers.google.com/admob/android/privacy/play-data-disclosure>):
+- Coletados e compartilhados: *Identificadores do dispositivo ou outros IDs* (ID de publicidade),
+  *Local aproximado*, *Interações com o app*, *Registros de falhas*, *Diagnóstico*.
+- Finalidade: Publicidade ou marketing, Análise, Prevenção de fraudes/segurança.
+- Dados criptografados em trânsito: Sim.
+- Fotos e vídeos: **não** coletados (processados só no aparelho).
+
+**Formulário do ID de publicidade:** Sim, o app usa o ID de publicidade (finalidade: publicidade).
+
+**Público-alvo:** 13 anos ou mais (evita as regras extras da política Famílias).

@@ -14,6 +14,9 @@ em caracteres ASCII**, como num terminal, com cursor piscando.
 - Gera MP4 H.264 a 30 fps direto no aparelho (MediaCodec, sem bibliotecas externas), com até 1080 px de largura.
 - Salva em `Filmes/ASCII Typer` ou compartilha direto (WhatsApp, Instagram, TikTok…).
 - Tudo é processado no próprio celular: nenhuma foto sai do aparelho.
+- Monetização com **anúncio intersticial do AdMob** exibido enquanto o vídeo é gerado
+  (no máximo um a cada 30 s — ajuste em `ads/AdsManager.kt`), com tela de consentimento
+  LGPD/GDPR (UMP) e botão "Privacidade".
 
 ## Estrutura
 
@@ -22,6 +25,7 @@ em caracteres ASCII**, como num terminal, com cursor piscando.
 | `ascii/AsciiConverter.kt` | Foto → grade de caracteres (auto-contraste, rampas de caracteres) |
 | `ascii/AsciiRenderer.kt` | Desenha os quadros (digitação incremental + cursor) e a linha do tempo |
 | `ascii/VideoExporter.kt` | Converte quadros para YUV e codifica em MP4 |
+| `ads/AdsManager.kt` | Consentimento, carregamento e exibição do intersticial |
 | `MainViewModel.kt` | Estado, pré-visualização, exportação, salvar/compartilhar |
 | `ui/MainScreen.kt` | Interface em Jetpack Compose |
 
@@ -60,10 +64,26 @@ debug como artefato (aba *Actions* → execução → *Artifacts*).
 4. **Conta de desenvolvedor**: crie em <https://play.google.com/console> (taxa única de US$ 25).
    Contas pessoais novas precisam fazer um **teste fechado com pelo menos 12 testadores por 14 dias**
    antes de liberar a produção.
-5. **Ficha da loja**: textos prontos em [`store/listing.md`](store/listing.md); ícone 512×512 e
+5. **AdMob** (anúncios):
+   - Crie a conta em <https://admob.google.com>, adicione o app (Android) e crie um bloco de
+     anúncios **Intersticial**. Você recebe dois IDs: o do app (`ca-app-pub-…~…`) e o do bloco
+     (`ca-app-pub-…/…`).
+   - Coloque-os no `keystore.properties`:
+     ```properties
+     admobAppId=ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
+     admobInterstitialId=ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ
+     ```
+     ou como secrets `ADMOB_APP_ID` e `ADMOB_INTERSTITIAL_ID` no GitHub. Sem eles, o release usa
+     os IDs de teste do Google (aparece anúncio de teste e **não gera receita**). O build de debug
+     sempre usa IDs de teste — **nunca clique nos seus anúncios reais**, isso pode banir a conta.
+   - No AdMob, em *Privacidade e mensagens*, crie a mensagem de consentimento GDPR (e, se quiser,
+     a de estados dos EUA). É ela que o app mostra na primeira abertura.
+   - Publique um arquivo `app-ads.txt` no site do desenvolvedor informado na Play Store, com a
+     linha que o AdMob fornece.
+6. **Ficha da loja**: textos prontos em [`store/listing.md`](store/listing.md); ícone 512×512 e
    imagem de destaque 1024×500 em `store/`. Faltam as capturas de tela (tire do app rodando).
-6. **Política de privacidade**: publique [`PRIVACY.md`](PRIVACY.md) num link público (ex.: GitHub
-   Pages) e informe a URL no Console. Na seção *Segurança dos dados*, declare que o app **não coleta
-   nem compartilha dados**.
-7. Envie o `.aab`, preencha a classificação de conteúdo e o público-alvo, e envie para revisão.
+7. **Política de privacidade**: publique [`PRIVACY.md`](PRIVACY.md) num link público (ex.: GitHub
+   Pages) e informe a URL no Console. Marque que o app **contém anúncios** e preencha
+   *Segurança dos dados* e o formulário do *ID de publicidade* conforme `store/listing.md`.
+8. Envie o `.aab`, preencha a classificação de conteúdo e o público-alvo, e envie para revisão.
    A cada nova versão, aumente `versionCode` e `versionName` em `app/build.gradle.kts`.

@@ -17,6 +17,16 @@ fun signingValue(key: String, env: String): String? =
 
 val releaseStoreFile = signingValue("storeFile", "KEYSTORE_PATH")
 
+// AdMob: IDs de TESTE do Google (seguros para desenvolvimento). Para o release, defina
+// ADMOB_APP_ID e ADMOB_INTERSTITIAL_ID em keystore.properties ou como variáveis de ambiente.
+val testAdmobAppId = "ca-app-pub-3940256099942544~3347511713"
+val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+val releaseAdmobAppId = signingValue("admobAppId", "ADMOB_APP_ID") ?: testAdmobAppId
+val releaseInterstitialId = signingValue("admobInterstitialId", "ADMOB_INTERSTITIAL_ID") ?: testInterstitialId
+if (releaseAdmobAppId == testAdmobAppId) {
+    logger.warn("AdMob: release usando IDs de TESTE (sem receita). Configure ADMOB_APP_ID/ADMOB_INTERSTITIAL_ID.")
+}
+
 android {
     namespace = "com.asciitype.app"
     compileSdk = 36
@@ -42,7 +52,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["admobAppId"] = testAdmobAppId
+            buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$testInterstitialId\"")
+        }
         release {
+            manifestPlaceholders["admobAppId"] = releaseAdmobAppId
+            buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$releaseInterstitialId\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -54,7 +70,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 }
 
 kotlin {
@@ -75,4 +94,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+
+    implementation("com.google.android.gms:play-services-ads:24.9.0")
+    implementation("com.google.android.ump:user-messaging-platform:3.2.0")
 }
