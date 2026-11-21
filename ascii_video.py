@@ -13,14 +13,14 @@ from PIL import Image, ImageDraw, ImageFont
 from ascii_art import to_ascii
 
 OUT_W, OUT_H, FPS = 1080, 1920, 30
-COLS = 120
+COLS = 220          # mesmo detalhe de ascii/retrato_ascii.png
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
-FSIZE = 40
-BG = (12, 13, 12)
-FG = (226, 230, 212)
-CURSOR = (120, 230, 140)
+FSIZE = 28
+BG = (245, 242, 232)   # creme, como a imagem ASCII
+FG = (30, 30, 30)
+CURSOR = (40, 40, 40)
 
-T_TYPE = 9.0       # duração da digitação
+T_TYPE = 10.0       # duração da digitação
 T_HOLD1 = 0.6      # pausa antes do zoom
 T_ZOOM = 3.6       # zoom reverso
 T_HOLD2 = 2.8      # imagem final
@@ -35,7 +35,7 @@ def main(src, dst):
     font = ImageFont.truetype(FONT, FSIZE)
     cw = font.getlength("M")
     lh = int(FSIZE * 1.18)
-    margin = 1200
+    margin = 1800
     CW = int(cw * COLS)
     CH = lh * len(lines)
     canvas = Image.new("RGB", (CW + 2 * margin, CH + 2 * margin), BG)
@@ -49,13 +49,13 @@ def main(src, dst):
     def pos(r, c):
         return margin + c * cw, margin + r * lh
 
-    s_zoom = OUT_W / (cw * 22)                       # ~22 caracteres na tela
+    s_zoom = OUT_W / (cw * 24)                       # ~24 caracteres na tela
     s_full = min(OUT_W / CW, OUT_H / CH) * 0.90
     full_c = (margin + CW / 2, margin + CH / 2)
 
     total = T_TYPE + T_HOLD1 + T_ZOOM + T_HOLD2
     nframes = int(total * FPS)
-    k = 6.0
+    k = 7.0
 
     ff = subprocess.Popen(
         ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo",
@@ -93,7 +93,7 @@ def main(src, dst):
 
         if t < T_TYPE + T_HOLD1:
             speed = new
-            follow = 1 / (1 + speed / 6)          # quanto mais rápido, menos segue no x
+            follow = 1 / (1 + speed / 8)          # quanto mais rápido, menos segue no x
             tx = cx * follow + full_c[0] * (1 - follow)
             if cam is None:
                 cam = [cx, cy]
