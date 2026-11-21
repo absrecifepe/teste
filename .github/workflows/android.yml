@@ -2,8 +2,13 @@ name: Android build
 
 on:
   push:
+    branches: ["**"]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write # necessário para criar o Release com o APK
 
 jobs:
   build:
@@ -31,23 +36,36 @@ jobs:
       - name: Lint
         run: ./gradlew --no-daemon lintDebug
 
-      # Só roda se os secrets de assinatura estiverem configurados no repositório.
-      - name: Build signed release bundle (AAB)
-        if: env.KEYSTORE_BASE64 != ''
+      # APK final para distribuir. Assinado se os secrets de assinatura existirem.
+      - name: Build release APK
         env:
-          KEYSTORE_PATH: release.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID }}
-          ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_INTERSTITIAL_ID }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > release.jks
-          ./gradlew --no-daemon bundleRelease
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > release.jks
+            export KEYSTORE_PATH=release.jks
+          fi
+          ./gradlew --no-daemon assembleRelease
           rm -f release.jks
+          mkdir -p dist
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            cp app/build/outputs/apk/release/app-release.apk dist/ASCII-Typer.apk
+          else
+            echo "::warning::Secrets de assinatura ausentes: APK de release NÃO assinado (não instala)."
+            cp app/build/outputs/apk/release/*.apk dist/
+          fi
 
       - uses: actions/upload-artifact@v4
-        if: env.KEYSTORE_BASE64 != ''
         with:
-          name: app-release-aab
-          path: app/build/outputs/bundle/release/*.aab
+          name: app-release-apk
+          path: dist/*.apk
+
+      # Ao enviar uma tag "v1.0.0", publica um Release com o APK para download público.
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') && env.KEYSTORE_BASE64 != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ASCII-Typer.apk
+          generate_release_notes: true

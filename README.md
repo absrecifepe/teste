@@ -40,6 +40,23 @@ Requisitos: Android 10+ (minSdk 29), targetSdk 36.
 **Pelo GitHub:** cada push roda o workflow `.github/workflows/android.yml`, que gera o APK de
 debug como artefato (aba *Actions* → execução → *Artifacts*).
 
+## Distribuir o APK por conta própria (sem Play Store)
+
+1. **Assinatura (uma vez só):** cadastre em *Settings → Secrets and variables → Actions* os
+   secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` e `KEY_PASSWORD` da sua chave.
+   Guarde a chave (`.jks`) e a senha em lugar seguro: sem elas, novas versões não instalam por
+   cima das antigas.
+2. **Gerar uma versão:** aumente `versionCode`/`versionName` em `app/build.gradle.kts` e crie uma
+   tag, ex. `v1.0.0`. O GitHub publica um *Release* com o `ASCII-Typer.apk` para download.
+   (Sem tag, o APK assinado fica em *Actions → execução → Artifacts → app-release-apk*.)
+3. **Instalar:** quem baixar precisa permitir "Instalar apps desconhecidos" para o navegador ou
+   gerenciador de arquivos. O Play Protect pode mostrar um aviso de "app desconhecido" — é normal
+   para apps fora da loja; basta tocar em "Instalar mesmo assim".
+
+> **Anúncios fora da Play Store:** o AdMob exige que o app esteja numa loja suportada (Google Play
+> ou outra aceita pelo AdMob) para aprovar o app e liberar anúncios de verdade. Distribuindo só o
+> APK, os anúncios tendem a não aparecer ou a render quase nada.
+
 ## Publicar na Play Store
 
 1. **Troque o `applicationId`** em `app/build.gradle.kts` (ex.: `com.seunome.asciityper`).

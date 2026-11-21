@@ -11,3 +11,6 @@ build/
 keystore.properties
 *.jks
 *.keystore
+
+# Chave de assinatura gerada localmente
+/assinatura/
