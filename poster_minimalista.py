@@ -41,43 +41,73 @@ def spline(pts, closed=True, n=16):
     return [tuple(((x * K + OX) * SS, (y * K + OY) * SS)) for x, y in out]
 
 
+def stipple(img, poly, density, tone, rng, rmin=2, rmax=4):
+    """Preenche a forma com uma leve camada de cor e pontinhos aleatórios,
+    imitando cabelo raspado / barba por fazer."""
+    mask = Image.new("L", img.size, 0)
+    ImageDraw.Draw(mask).polygon(poly, fill=255)
+    m = np.asarray(mask) > 0
+    # camada de tom transparente
+    arr = np.asarray(img).astype(np.float32)
+    ink = np.array(INK, np.float32)
+    arr[m] = arr[m] * (1 - tone) + ink * tone
+    out = Image.fromarray(arr.astype(np.uint8))
+    d = ImageDraw.Draw(out)
+    ys, xs = np.nonzero(m)
+    n = int(len(xs) * density)
+    idx = rng.choice(len(xs), n, replace=False)
+    for x, y in zip(xs[idx], ys[idx]):
+        r = rng.uniform(rmin, rmax)
+        d.ellipse([x - r, y - r, x + r, y + r], fill=INK)
+    return out
+
+
 def main(dst):
     img = Image.new("RGB", (W * SS, H * SS), BG)
+    rng = np.random.default_rng(11)
+
+    # orelhas em um tom um pouco mais escuro do fundo, para dar forma à cabeça
     d = ImageDraw.Draw(img)
+    ear_tone = tuple(int(c * 0.86) for c in BG)
+    ear_l = [(100, 370), (78, 365), (68, 395), (78, 460), (98, 525),
+             (112, 535), (110, 450)]
+    ear_r = [(600 - x + 4, y) for x, y in ear_l]
+    d.polygon(spline(ear_l), fill=ear_tone)
+    d.polygon(spline(ear_r), fill=ear_tone)
 
-    # cabelo raspado: "ferradura" grossa nas laterais, sumindo no topo careca
-    hair_left = [(98, 380), (100, 300), (112, 225), (140, 160), (180, 112),
-                 (225, 82), (240, 92), (200, 130), (165, 185), (142, 250),
-                 (132, 320), (130, 385)]
-    hair_right = [(600 - x, y)
-                  for x, y in hair_left]
-    d.polygon(spline(hair_left), fill=INK)
-    d.polygon(spline(hair_right), fill=INK)
+    # cabelo raspado e ralo: faixa fina nas laterais, sumindo antes do topo
+    hair_left = [(104, 385), (104, 300), (114, 230), (138, 170), (170, 128),
+                 (178, 138), (152, 185), (132, 245), (124, 310), (122, 380)]
+    hair_right = [(600 - x, y) for x, y in hair_left]
+    for poly in (hair_left, hair_right):
+        img = stipple(img, spline(poly), 0.010, 0.30, rng)
 
-    # sobrancelhas
-    brow_l = [(150, 352), (185, 336), (232, 330), (262, 336), (258, 346),
-              (225, 343), (185, 348), (155, 360)]
-    brow_r = [(322, 338), (355, 328), (400, 330), (440, 344), (436, 352),
-              (398, 342), (358, 341), (326, 348)]
+    # barba por fazer: rente à mandíbula, com bigode e cavanhaque ralos
+    beard = [
+        (110, 470), (114, 545), (132, 615), (168, 678), (218, 724),
+        (272, 746), (330, 746), (392, 724), (444, 676), (476, 612),
+        (490, 545), (490, 470),
+        (472, 490), (458, 560), (430, 620), (392, 640), (360, 615),
+        (300, 612), (240, 615), (208, 640), (170, 620), (142, 560),
+        (126, 490),
+    ]
+    img = stipple(img, spline(beard), 0.012, 0.28, rng)
+    mustache = [(205, 572), (250, 552), (300, 548), (350, 552), (395, 572),
+                (350, 566), (300, 563), (250, 566)]
+    img = stipple(img, spline(mustache), 0.016, 0.32, rng)
+
+    # sobrancelhas finas (traço sólido)
+    d = ImageDraw.Draw(img)
+    brow_l = [(152, 352), (188, 338), (232, 333), (262, 338), (258, 345),
+              (225, 341), (188, 346), (156, 358)]
+    brow_r = [(322, 338), (356, 330), (400, 332), (440, 344), (436, 350),
+              (398, 340), (358, 339), (326, 345)]
     d.polygon(spline(brow_l), fill=INK)
     d.polygon(spline(brow_r), fill=INK)
 
-    # barba: contorno externo da mandíbula, borda interna nas bochechas
-    beard = [
-        (106, 455), (110, 540), (128, 615), (165, 680), (215, 728),
-        (270, 752), (330, 752), (395, 728), (448, 678), (480, 610),
-        (494, 535), (494, 455),
-        # volta pelas bochechas (borda interna)
-        (478, 470), (462, 530), (436, 585), (398, 565), (350, 545),
-        (300, 535), (250, 540), (205, 561), (166, 585), (140, 530),
-        (122, 470),
-    ]
-    d.polygon(spline(beard), fill=INK)
-
-    # boca: fenda na cor do fundo entre bigode e cavanhaque
-    mouth = [(228, 584), (265, 578), (300, 580), (335, 578), (366, 585),
-             (335, 591), (300, 593), (265, 591)]
-    d.polygon(spline(mouth), fill=BG)
+    # boca: um traço fino
+    d.line(spline([(232, 586), (300, 582), (368, 587)], closed=False),
+           fill=INK, width=7 * SS)
 
     # suaviza levemente as bordas e volta para o tamanho final
     img = img.resize((W, H), Image.LANCZOS)
