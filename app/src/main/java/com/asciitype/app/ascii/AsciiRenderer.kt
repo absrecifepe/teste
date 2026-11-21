@@ -100,7 +100,7 @@ class AsciiRenderer(
     val typedCount: Int get() = order.size
 
     private val paint = FrameLayout.monoPaint().apply { textSize = layout.textSize }
-    private val cursorPaint = Paint().apply { color = style.cursor }
+    private val cursorPaint = Paint().apply { color = this@AsciiRenderer.style.cursor }
     private val baselineShift = -paint.fontMetrics.ascent
 
     private val base: Bitmap = Bitmap.createBitmap(layout.width, layout.height, Bitmap.Config.ARGB_8888)
