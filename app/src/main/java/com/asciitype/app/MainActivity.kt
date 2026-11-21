@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.content.IntentCompat
-import com.asciitype.app.ads.AdsManager
 import com.asciitype.app.ui.AsciiTheme
 import com.asciitype.app.ui.MainScreen
 
@@ -20,7 +19,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState == null) handleShare(intent)
-        AdsManager.gatherConsent(this)
         setContent {
             AsciiTheme { MainScreen(vm) }
         }

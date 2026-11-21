@@ -34,5 +34,4 @@
     <string name="msg_export_error">Error creating the video. Try fewer columns.</string>
     <string name="msg_saved">Video saved to Movies/ASCII Typer</string>
     <string name="msg_save_error">Could not save the video.</string>
-    <string name="privacy">Privacy</string>
 </resources>

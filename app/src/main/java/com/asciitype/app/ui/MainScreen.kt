@@ -1,7 +1,6 @@
 package com.asciitype.app.ui
 
 import android.widget.VideoView
-import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,7 +35,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,7 +56,6 @@ import com.asciitype.app.R
 import com.asciitype.app.Settings
 import com.asciitype.app.UiState
 import com.asciitype.app.VideoResult
-import com.asciitype.app.ads.AdsManager
 import com.asciitype.app.ascii.Charset
 import com.asciitype.app.ascii.ColorStyle
 import kotlin.math.roundToInt
@@ -68,7 +65,6 @@ import kotlin.math.roundToInt
 fun MainScreen(vm: MainViewModel) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val activity = LocalActivity.current
     val snackbar = remember { SnackbarHostState() }
 
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -92,13 +88,6 @@ fun MainScreen(vm: MainViewModel) {
                 title = {
                     Text(stringResource(R.string.app_name), fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                 },
-                actions = {
-                    if (AdsManager.privacyOptionsRequired && activity != null) {
-                        TextButton(onClick = { AdsManager.showPrivacyOptions(activity) }) {
-                            Text(stringResource(R.string.privacy))
-                        }
-                    }
-                },
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
@@ -117,11 +106,7 @@ fun MainScreen(vm: MainViewModel) {
                 PreviewArea(state)
                 ActionArea(
                     state = state,
-                    onGenerate = {
-                        // O vídeo continua sendo gerado em segundo plano enquanto o anúncio aparece.
-                        vm.generateVideo()
-                        activity?.let(AdsManager::maybeShow)
-                    },
+                    onGenerate = vm::generateVideo,
                     onCancel = vm::cancelExport,
                     onSave = vm::saveToGallery,
                     onShare = { vm.shareIntent()?.let(context::startActivity) },
