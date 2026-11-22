@@ -77,7 +77,6 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 _state.update { it.copy(loadingPhoto = false, message = R.string.msg_load_error) }
                 return@launch
             }
-            source?.recycle()
             source = bmp
             _state.update { it.copy(hasPhoto = true, loadingPhoto = false) }
             refreshPreview(immediate = true)
@@ -192,7 +191,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun startOver() {
         exportJob?.cancel()
         previewJob?.cancel()
-        source?.recycle()
+        // Sem recycle(): um trabalho em segundo plano ainda pode estar lendo o bitmap.
         source = null
         val settings = _state.value.settings
         _state.value = UiState(settings = settings)
