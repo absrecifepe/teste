@@ -20,9 +20,11 @@ enum class ColorStyle(
     val cursor: Int,
     val denseIsDark: Boolean = false,
     val useOriginalColors: Boolean = false,
+    /** Tom mínimo das letras (0 = cor do fundo, 1 = cor da tinta). Mais alto = mais contraste. */
+    val minTone: Float = 0.35f,
 ) {
     // Fundo branco, letras em tons de cinza (mais escuras onde a foto é mais escura).
-    PAPER(R.string.style_paper, 0xFFFFFFFF.toInt(), 0xFF111111.toInt(), 0xFF111111.toInt(), denseIsDark = true),
+    PAPER(R.string.style_paper, 0xFFFFFFFF.toInt(), 0xFF000000.toInt(), 0xFF000000.toInt(), denseIsDark = true, minTone = 0.55f),
     MATRIX(R.string.style_matrix, 0xFF050805.toInt(), 0xFF39FF6A.toInt(), 0xFF39FF6A.toInt()),
     TERMINAL(R.string.style_terminal, 0xFF0A0A0A.toInt(), 0xFFF2F2F2.toInt(), 0xFFF2F2F2.toInt()),
     COLOR(R.string.style_color, 0xFF000000.toInt(), Color.WHITE, Color.WHITE, useOriginalColors = true),
@@ -128,7 +130,7 @@ class AsciiRenderer(
     }
 
     private fun colorFor(i: Int): Int {
-        val k = 0.35f + 0.65f * art.ink[i]
+        val k = style.minTone + (1f - style.minTone) * art.ink[i]
         val c = if (style.useOriginalColors) boost(art.rgb[i]) else style.ink
         // Mais "tinta" = mais próximo da cor da tinta; menos = mais próximo do fundo.
         return mix(style.background, c, k)

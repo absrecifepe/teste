@@ -37,7 +37,7 @@ data class Settings(
     val style: ColorStyle = ColorStyle.PAPER,
     val typingSeconds: Int = 8,
     val invert: Boolean = false,
-    /** Texto digitado no começo do vídeo, no topo da imagem. */
+    /** Texto cujas letras formam a figura (repetido). Vazio = caracteres normais. */
     val headerText: String = "",
     /** Começa com a câmera aproximada e vai se afastando. */
     val zoomIntro: Boolean = true,
@@ -101,11 +101,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         previewJob?.cancel()
         previewJob = viewModelScope.launch(Dispatchers.Default) {
             if (!immediate) delay(150)
-            val header = AsciiConverter.wrapHeader(s.headerText, s.columns)
-            val layout = FrameLayout.compute(
-                src.width, src.height, s.columns, 540, 960, AsciiConverter.headerRows(header),
-            )
-            val art = AsciiConverter.withHeader(convert(src, layout, s), header)
+            val layout = FrameLayout.compute(src.width, src.height, s.columns, 540, 960)
+            val art = AsciiConverter.fillWithText(convert(src, layout, s), s.headerText)
             val renderer = AsciiRenderer(art, layout, s.style)
             val bmp = renderer.renderFinal()
             renderer.release()
@@ -122,15 +119,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val result = withContext(Dispatchers.Default) {
                     videoDir.listFiles()?.forEach { it.delete() }
-                    val header = AsciiConverter.wrapHeader(s.headerText, s.columns)
-                    val layout = VideoExporter.chooseLayout(
-                        src.width, src.height, s.columns, AsciiConverter.headerRows(header),
-                    )
-                    val art = AsciiConverter.withHeader(convert(src, layout, s), header)
+                    val layout = VideoExporter.chooseLayout(src.width, src.height, s.columns)
+                    val art = AsciiConverter.fillWithText(convert(src, layout, s), s.headerText)
                     val renderer = AsciiRenderer(art, layout, s.style)
-                    val imageChars = renderer.typedCount - art.headerCount
-                    // Introdução lenta: o texto inteiro + algumas linhas da foto (se houver zoom).
-                    val intro = art.headerCount + if (s.zoomIntro) minOf(imageChars / 15, 90) else 0
+                    // Introdução lenta (só com zoom): a 1ª repetição do texto + algumas linhas.
+                    val intro = if (s.zoomIntro) {
+                        art.messageChars + minOf(renderer.typedCount / 15, 90)
+                    } else {
+                        0
+                    }
                     val timeline = Timeline(
                         totalChars = renderer.typedCount,
                         introChars = intro,

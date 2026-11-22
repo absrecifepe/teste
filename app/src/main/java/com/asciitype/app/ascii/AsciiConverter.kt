@@ -1,7 +1,6 @@
 package com.asciitype.app.ascii
 
 import android.graphics.Bitmap
-import android.graphics.Color
 import androidx.annotation.StringRes
 import com.asciitype.app.R
 import kotlin.math.pow
@@ -27,8 +26,8 @@ class AsciiArt(
     val chars: CharArray,
     val ink: FloatArray,
     val rgb: IntArray,
-    /** Quantos caracteres (não-espaço) do texto do topo vêm antes da foto. */
-    val headerCount: Int = 0,
+    /** Letras (sem espaços) de uma repetição do texto do usuário; 0 se não houver texto. */
+    val messageChars: Int = 0,
 )
 
 object AsciiConverter {
@@ -94,59 +93,27 @@ object AsciiConverter {
         return AsciiArt(cols, rows, chars, ink, rgb)
     }
 
-    /** Quebra o texto do usuário em até [maxLines] linhas que cabem em [cols] colunas. */
-    fun wrapHeader(text: String, cols: Int, maxLines: Int = 4): List<String> {
+    /**
+     * Desenha a figura com o texto do usuário: cada célula que teria um caractere recebe a
+     * próxima letra do texto (repetido em ordem de leitura). O claro/escuro da foto continua
+     * vindo do tom de cada letra. Espaços do texto viram pequenas pausas entre as palavras.
+     */
+    fun fillWithText(art: AsciiArt, text: String): AsciiArt {
         val clean = text
-            .filterNot { it.isSurrogate() || (it.isISOControl() && it != '\n') }
+            .filterNot { it.isSurrogate() || it.isISOControl() }
             .replace(Regex("\\s+"), " ")
             .trim()
-        if (clean.isEmpty()) return emptyList()
-        val width = (cols - 4).coerceAtLeast(8)
-        val lines = mutableListOf<String>()
-        var line = StringBuilder()
-        for (word in clean.split(' ')) {
-            var w = word
-            while (w.length > width) { // palavra maior que a linha: quebra no meio
-                if (line.isNotEmpty()) { lines += line.toString(); line = StringBuilder() }
-                lines += w.substring(0, width)
-                w = w.substring(width)
-            }
-            if (w.isEmpty()) continue
-            if (line.isEmpty()) line.append(w)
-            else if (line.length + 1 + w.length <= width) line.append(' ').append(w)
-            else { lines += line.toString(); line = StringBuilder(w) }
-        }
-        if (line.isNotEmpty()) lines += line.toString()
-        return lines.take(maxLines)
-    }
-
-    /** Linhas extras que o texto ocupa no topo (texto + uma linha em branco). */
-    fun headerRows(lines: List<String>): Int = if (lines.isEmpty()) 0 else lines.size + 1
-
-    /** Coloca as [lines] centralizadas no topo da arte, que passa a fazer parte da imagem. */
-    fun withHeader(art: AsciiArt, lines: List<String>): AsciiArt {
-        if (lines.isEmpty()) return art
-        val cols = art.cols
-        val extra = headerRows(lines)
-        val rows = art.rows + extra
-        val chars = CharArray(rows * cols) { ' ' }
-        val ink = FloatArray(rows * cols)
-        val rgb = IntArray(rows * cols) { Color.WHITE }
-        var count = 0
-        lines.forEachIndexed { li, line ->
-            val start = ((cols - line.length) / 2).coerceAtLeast(0)
-            line.forEachIndexed { k, ch ->
-                val i = li * cols + start + k
-                chars[i] = ch
-                ink[i] = 1f
-                if (ch != ' ') count++
+        if (clean.isEmpty()) return art
+        val seq = "$clean "
+        val chars = art.chars.copyOf()
+        var k = 0
+        for (i in chars.indices) {
+            if (chars[i] != ' ') {
+                chars[i] = seq[k % seq.length]
+                k++
             }
         }
-        val off = extra * cols
-        art.chars.copyInto(chars, off)
-        art.ink.copyInto(ink, off)
-        art.rgb.copyInto(rgb, off)
-        return AsciiArt(cols, rows, chars, ink, rgb, headerCount = count)
+        return AsciiArt(art.cols, art.rows, chars, art.ink, art.rgb, messageChars = clean.count { it != ' ' })
     }
 
     /** Reduz em etapas de 1/2 para evitar serrilhado, e então para o tamanho final. */

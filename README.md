@@ -12,8 +12,8 @@ em caracteres ASCII**, como num terminal, com cursor piscando.
   Blocos, Binário) e inversão claro/escuro.
 - **Zoom de abertura:** o vídeo começa com a câmera bem perto das letras sendo digitadas, seguindo
   o cursor; depois de algumas linhas a digitação acelera e a câmera se afasta até mostrar a foto toda.
-- **Texto de abertura (opcional, até 80 caracteres):** digitado primeiro e centralizado no topo,
-  fazendo parte da imagem final.
+- **Texto que forma a imagem (opcional, até 80 caracteres):** em vez dos símbolos ASCII, a foto é
+  desenhada com as letras do texto, repetido em sequência; com o zoom, a 1ª repetição é digitada de perto.
 - Pré-visualização instantânea do resultado final.
 - Gera MP4 H.264 a 30 fps direto no aparelho (MediaCodec, sem bibliotecas externas), com até 1080 px de largura.
 - Salva em `Filmes/ASCII Typer` ou compartilha direto (WhatsApp, Instagram, TikTok…).
