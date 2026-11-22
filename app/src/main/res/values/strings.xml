@@ -37,7 +37,7 @@
     <string name="msg_saved">Vídeo salvo em Filmes/ASCII Typer</string>
     <string name="msg_save_error">Não foi possível salvar o vídeo.</string>
     <string name="start_over">Voltar ao início</string>
-    <string name="setting_text">Texto que forma a imagem (opcional)</string>
+    <string name="setting_text">Texto dentro da imagem (opcional)</string>
     <string name="setting_text_hint">Ex.: Feliz aniversário, Ana!</string>
     <string name="setting_zoom">Começar com zoom nas letras</string>
     <string name="save_image">Salvar imagem</string>

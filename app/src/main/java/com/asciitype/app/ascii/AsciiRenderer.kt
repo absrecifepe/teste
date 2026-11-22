@@ -105,8 +105,12 @@ class AsciiRenderer(
     private val layout: FrameLayout,
     private val style: ColorStyle,
 ) {
-    /** Índices das células não vazias, em ordem de leitura (ordem de digitação). */
-    private val order: IntArray = art.chars.indices.filter { art.chars[it] != ' ' }.toIntArray()
+    /** Ordem de digitação: primeiro o texto do usuário, depois as demais células em ordem de leitura. */
+    private val order: IntArray = run {
+        val first = art.firstCells.filter { art.chars[it] != ' ' }
+        val firstSet = first.toHashSet()
+        (first + art.chars.indices.filter { art.chars[it] != ' ' && it !in firstSet }).toIntArray()
+    }
     val typedCount: Int get() = order.size
 
     /** Posição de cada célula na ordem de digitação (-1 = espaço). */

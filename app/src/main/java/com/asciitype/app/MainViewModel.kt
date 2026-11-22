@@ -37,7 +37,7 @@ data class Settings(
     val style: ColorStyle = ColorStyle.PAPER,
     val typingSeconds: Int = 8,
     val invert: Boolean = false,
-    /** Texto cujas letras formam a figura (repetido). Vazio = caracteres normais. */
+    /** Texto embutido uma vez na figura e digitado primeiro. Vazio = só a foto. */
     val headerText: String = "",
     /** Começa com a câmera aproximada e vai se afastando. */
     val zoomIntro: Boolean = true,
@@ -103,7 +103,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         previewJob = viewModelScope.launch(Dispatchers.Default) {
             if (!immediate) delay(150)
             val layout = FrameLayout.compute(src.width, src.height, s.columns, 540, 960)
-            val art = AsciiConverter.fillWithText(convert(src, layout, s), s.headerText)
+            val art = AsciiConverter.embedText(convert(src, layout, s), s.headerText)
             val renderer = AsciiRenderer(art, layout, s.style)
             val bmp = renderer.renderFinal()
             renderer.release()
@@ -121,9 +121,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 val result = withContext(Dispatchers.Default) {
                     videoDir.listFiles()?.forEach { it.delete() }
                     val layout = VideoExporter.chooseLayout(src.width, src.height, s.columns)
-                    val art = AsciiConverter.fillWithText(convert(src, layout, s), s.headerText)
+                    val art = AsciiConverter.embedText(convert(src, layout, s), s.headerText)
                     val renderer = AsciiRenderer(art, layout, s.style)
-                    // Introdução lenta (só com zoom): a 1ª repetição do texto + algumas linhas.
+                    // Introdução lenta (só com zoom): o texto do usuário + algumas linhas.
                     val intro = if (s.zoomIntro) {
                         art.messageChars + minOf(renderer.typedCount / 15, 90)
                     } else {
@@ -201,7 +201,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val ok = withContext(Dispatchers.Default) {
                 runCatching {
                     val layout = FrameLayout.compute(src.width, src.height, s.columns, 2048, 3640)
-                    val art = AsciiConverter.fillWithText(convert(src, layout, s), s.headerText)
+                    val art = AsciiConverter.embedText(convert(src, layout, s), s.headerText)
                     val renderer = AsciiRenderer(art, layout, s.style)
                     val bmp = try { renderer.renderFinal() } finally { renderer.release() }
                     try {

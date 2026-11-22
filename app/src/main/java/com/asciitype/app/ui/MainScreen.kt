@@ -321,8 +321,7 @@ private fun SettingsPanel(settings: Settings, enabled: Boolean, onChange: ((Sett
                     selected = settings.charset == cs,
                     onClick = { onChange { it.copy(charset = cs) } },
                     label = { Text(stringResource(cs.label)) },
-                    // Com texto, as letras do texto substituem os caracteres.
-                    enabled = enabled && settings.headerText.isBlank(),
+                    enabled = enabled,
                 )
             }
         }

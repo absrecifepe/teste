@@ -26,8 +26,10 @@ class AsciiArt(
     val chars: CharArray,
     val ink: FloatArray,
     val rgb: IntArray,
-    /** Letras (sem espaços) de uma repetição do texto do usuário; 0 se não houver texto. */
+    /** Letras (sem espaços) do texto do usuário embutido na figura; 0 se não houver texto. */
     val messageChars: Int = 0,
+    /** Células digitadas antes de todas as outras (as do texto do usuário). */
+    val firstCells: IntArray = IntArray(0),
 )
 
 object AsciiConverter {
@@ -94,26 +96,60 @@ object AsciiConverter {
     }
 
     /**
-     * Desenha a figura com o texto do usuário: cada célula que teria um caractere recebe a
-     * próxima letra do texto (repetido em ordem de leitura). O claro/escuro da foto continua
-     * vindo do tom de cada letra. Espaços do texto viram pequenas pausas entre as palavras.
+     * Embute o texto do usuário UMA vez dentro da figura, no lugar de alguns caracteres ASCII.
+     * Procura a primeira linha com um trecho contínuo de caracteres longo o bastante para o texto
+     * ficar legível e escreve a partir dali (continuando nas próximas células da figura se não
+     * couber). Essas células são digitadas primeiro no vídeo; o resto segue a ordem de leitura.
      */
-    fun fillWithText(art: AsciiArt, text: String): AsciiArt {
+    fun embedText(art: AsciiArt, text: String): AsciiArt {
         val clean = text
             .filterNot { it.isSurrogate() || it.isISOControl() }
             .replace(Regex("\\s+"), " ")
             .trim()
         if (clean.isEmpty()) return art
-        val seq = "$clean "
+        val cols = art.cols
         val chars = art.chars.copyOf()
-        var k = 0
-        for (i in chars.indices) {
-            if (chars[i] != ' ') {
-                chars[i] = seq[k % seq.length]
-                k++
+        val ink = art.ink.copyOf()
+        val n = chars.size
+
+        // Início: primeiro trecho contínuo (numa mesma linha) com tamanho suficiente.
+        val need = minOf(clean.length, maxOf(8, cols / 3))
+        var start = -1
+        var row = 0
+        while (row < art.rows && start < 0) {
+            var run = 0
+            for (col in 0 until cols) {
+                val i = row * cols + col
+                if (chars[i] != ' ') {
+                    run++
+                    if (run >= need) { start = i - need + 1; break }
+                } else {
+                    run = 0
+                }
             }
+            row++
         }
-        return AsciiArt(art.cols, art.rows, chars, art.ink, art.rgb, messageChars = clean.count { it != ' ' })
+        if (start < 0) start = chars.indexOfFirst { it != ' ' }.coerceAtLeast(0)
+
+        val cells = ArrayList<Int>(clean.length)
+        var i = start
+        var k = 0
+        while (k < clean.length && i < n) {
+            if (chars[i] != ' ') {
+                val ch = clean[k++]
+                chars[i] = ch
+                if (ch != ' ') {
+                    ink[i] = maxOf(ink[i], 0.85f) // texto bem visível
+                    cells += i
+                }
+            }
+            i++
+        }
+        return AsciiArt(
+            art.cols, art.rows, chars, ink, art.rgb,
+            messageChars = cells.size,
+            firstCells = cells.toIntArray(),
+        )
     }
 
     /** Reduz em etapas de 1/2 para evitar serrilhado, e então para o tamanho final. */

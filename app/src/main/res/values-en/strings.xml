@@ -35,7 +35,7 @@
     <string name="msg_saved">Video saved to Movies/ASCII Typer</string>
     <string name="msg_save_error">Could not save the video.</string>
     <string name="start_over">Back to start</string>
-    <string name="setting_text">Text that draws the image (optional)</string>
+    <string name="setting_text">Text inside the image (optional)</string>
     <string name="setting_text_hint">E.g.: Happy birthday, Ana!</string>
     <string name="setting_zoom">Start zoomed in on the letters</string>
     <string name="save_image">Save image</string>
