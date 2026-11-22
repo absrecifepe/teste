@@ -6,6 +6,11 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Versão a publicar (ex.: 1.0.0). Deixe vazio para só compilar."
+        required: false
+        default: ""
 
 permissions:
   contents: write # necessário para criar o Release com o APK
@@ -62,10 +67,14 @@ jobs:
           name: app-release-apk
           path: dist/*.apk
 
-      # Ao enviar uma tag "v1.0.0", publica um Release com o APK para download público.
+      # Publica um Release com o APK: ao enviar uma tag "v1.0.0", ou ao rodar o workflow
+      # manualmente (Actions > Android build > Run workflow) informando a versão.
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v') && env.KEYSTORE_BASE64 != ''
+        if: env.KEYSTORE_BASE64 != '' && (startsWith(github.ref, 'refs/tags/v') || inputs.version != '')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.version != '' && format('v{0}', inputs.version) || github.ref_name }}
+          name: ASCII Typer ${{ inputs.version != '' && inputs.version || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           files: dist/ASCII-Typer.apk
           generate_release_notes: true
