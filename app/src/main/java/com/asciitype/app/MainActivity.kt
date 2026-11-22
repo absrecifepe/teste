@@ -33,6 +33,9 @@ class MainActivity : ComponentActivity() {
     private fun handleShare(intent: Intent?) {
         if (intent?.action != Intent.ACTION_SEND) return
         val uri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java) ?: return
+        // Segurança: só aceita imagens entregues por outro app via content://. Bloqueia file://
+        // (que poderia apontar para arquivos privados deste app) e URIs do próprio app.
+        if (uri.scheme != "content" || uri.authority?.startsWith(packageName) == true) return
         vm.onPhotoPicked(uri)
     }
 }
