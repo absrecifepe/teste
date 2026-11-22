@@ -20,11 +20,12 @@ enum class ColorStyle(
     val denseIsDark: Boolean = false,
     val useOriginalColors: Boolean = false,
 ) {
+    // Fundo branco, letras em tons de cinza (mais escuras onde a foto é mais escura).
+    PAPER(R.string.style_paper, 0xFFFFFFFF.toInt(), 0xFF111111.toInt(), 0xFF111111.toInt(), denseIsDark = true),
     MATRIX(R.string.style_matrix, 0xFF050805.toInt(), 0xFF39FF6A.toInt(), 0xFF39FF6A.toInt()),
     TERMINAL(R.string.style_terminal, 0xFF0A0A0A.toInt(), 0xFFF2F2F2.toInt(), 0xFFF2F2F2.toInt()),
     COLOR(R.string.style_color, 0xFF000000.toInt(), Color.WHITE, Color.WHITE, useOriginalColors = true),
     AMBER(R.string.style_amber, 0xFF0D0700.toInt(), 0xFFFFB000.toInt(), 0xFFFFB000.toInt()),
-    PAPER(R.string.style_paper, 0xFFF7F3EA.toInt(), 0xFF1A1A1A.toInt(), 0xFF1A1A1A.toInt(), denseIsDark = true),
 }
 
 /** Geometria do quadro: grade de caracteres + tamanho do vídeo em pixels. */

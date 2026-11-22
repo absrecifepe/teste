@@ -10,7 +10,7 @@ Transforme qualquer foto em um vídeo hipnotizante: sua imagem surge caractere p
 como se um hacker estivesse digitando no terminal.
 
 ✔ Escolha uma foto e veja a prévia na hora
-✔ 5 estilos: Matrix, Terminal, Colorido, Âmbar e Papel
+✔ 5 estilos: Branco, Matrix, Terminal, Colorido e Âmbar
 ✔ 4 conjuntos de caracteres: Clássico, Detalhado, Blocos e Binário
 ✔ Ajuste o nível de detalhe e a velocidade da digitação
 ✔ Vídeo MP4 em alta qualidade, pronto para Reels, TikTok, Status e Stories

@@ -8,7 +8,7 @@ em caracteres ASCII**, como num terminal, com cursor piscando.
 - Escolhe foto pelo seletor do sistema (sem pedir permissão de armazenamento) ou recebe via
   "Compartilhar" da galeria.
 - Ajustes: nível de detalhe (30–160 colunas), duração da digitação (3–30 s), 5 estilos de cor
-  (Matrix, Terminal, Colorido, Âmbar, Papel), 4 conjuntos de caracteres (Clássico, Detalhado,
+  (Branco — padrão, Matrix, Terminal, Colorido, Âmbar), 4 conjuntos de caracteres (Clássico, Detalhado,
   Blocos, Binário) e inversão claro/escuro.
 - Pré-visualização instantânea do resultado final.
 - Gera MP4 H.264 a 30 fps direto no aparelho (MediaCodec, sem bibliotecas externas), com até 1080 px de largura.

@@ -34,7 +34,7 @@ import kotlin.math.max
 data class Settings(
     val columns: Int = 80,
     val charset: Charset = Charset.CLASSIC,
-    val style: ColorStyle = ColorStyle.MATRIX,
+    val style: ColorStyle = ColorStyle.PAPER,
     val typingSeconds: Int = 8,
     val invert: Boolean = false,
 )

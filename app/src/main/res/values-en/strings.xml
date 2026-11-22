@@ -23,7 +23,7 @@
     <string name="style_terminal">Terminal</string>
     <string name="style_color">Color</string>
     <string name="style_amber">Amber</string>
-    <string name="style_paper">Paper</string>
+    <string name="style_paper">White</string>
 
     <string name="charset_classic">Classic</string>
     <string name="charset_detailed">Detailed</string>
