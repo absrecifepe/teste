@@ -188,6 +188,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         return Intent.createChooser(send, app.getString(R.string.share_title))
     }
 
+    /** Volta para a tela inicial, descartando foto, prévia e vídeo (mantém as configurações). */
+    fun startOver() {
+        exportJob?.cancel()
+        previewJob?.cancel()
+        source?.recycle()
+        source = null
+        val settings = _state.value.settings
+        _state.value = UiState(settings = settings)
+    }
+
     fun messageShown() {
         _state.update { it.copy(message = null) }
     }

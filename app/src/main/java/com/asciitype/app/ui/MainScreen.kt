@@ -1,6 +1,7 @@
 package com.asciitype.app.ui
 
 import android.widget.VideoView
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -74,6 +75,9 @@ fun MainScreen(vm: MainViewModel) {
         picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 
+    // O botão "voltar" do celular também retorna à tela inicial.
+    BackHandler(enabled = state.hasPhoto) { vm.startOver() }
+
     val messageText = state.message?.let { stringResource(it) }
     LaunchedEffect(messageText) {
         if (messageText != null) {
@@ -110,6 +114,7 @@ fun MainScreen(vm: MainViewModel) {
                     onCancel = vm::cancelExport,
                     onSave = vm::saveToGallery,
                     onShare = { vm.shareIntent()?.let(context::startActivity) },
+                    onStartOver = vm::startOver,
                 )
                 SettingsPanel(
                     settings = state.settings,
@@ -218,6 +223,7 @@ private fun ActionArea(
     onCancel: () -> Unit,
     onSave: () -> Unit,
     onShare: () -> Unit,
+    onStartOver: () -> Unit,
 ) {
     when {
         state.exporting -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -227,9 +233,14 @@ private fun ActionArea(
                 Text(stringResource(R.string.cancel))
             }
         }
-        state.video != null -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onSave, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.save)) }
-            Button(onClick = onShare, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.share)) }
+        state.video != null -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = onSave, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.save)) }
+                Button(onClick = onShare, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.share)) }
+            }
+            OutlinedButton(onClick = onStartOver, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.start_over))
+            }
         }
         else -> Button(onClick = onGenerate, enabled = state.preview != null, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.generate))

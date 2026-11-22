@@ -36,4 +36,5 @@
     <string name="msg_export_error">Erro ao gerar o vídeo. Tente com menos colunas.</string>
     <string name="msg_saved">Vídeo salvo em Filmes/ASCII Typer</string>
     <string name="msg_save_error">Não foi possível salvar o vídeo.</string>
+    <string name="start_over">Voltar ao início</string>
 </resources>
