@@ -38,4 +38,7 @@
     <string name="setting_text">Text that draws the image (optional)</string>
     <string name="setting_text_hint">E.g.: Happy birthday, Ana!</string>
     <string name="setting_zoom">Start zoomed in on the letters</string>
+    <string name="save_image">Save image</string>
+    <string name="saving_image">Saving image…</string>
+    <string name="msg_image_saved">Image saved to Pictures/ASCII Typer</string>
 </resources>

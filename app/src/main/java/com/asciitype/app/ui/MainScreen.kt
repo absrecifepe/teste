@@ -116,6 +116,7 @@ fun MainScreen(vm: MainViewModel) {
                     onGenerate = vm::generateVideo,
                     onCancel = vm::cancelExport,
                     onSave = vm::saveToGallery,
+                    onSaveImage = vm::saveImage,
                     onShare = { vm.shareIntent()?.let(context::startActivity) },
                     onStartOver = vm::startOver,
                 )
@@ -225,9 +226,15 @@ private fun ActionArea(
     onGenerate: () -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
+    onSaveImage: () -> Unit,
     onShare: () -> Unit,
     onStartOver: () -> Unit,
 ) {
+    val saveImageButton: @Composable (Modifier) -> Unit = { modifier ->
+        OutlinedButton(onClick = onSaveImage, enabled = state.preview != null && !state.savingImage, modifier = modifier) {
+            Text(stringResource(if (state.savingImage) R.string.saving_image else R.string.save_image))
+        }
+    }
     when {
         state.exporting -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.exporting, (state.progress * 100).roundToInt()))
@@ -241,12 +248,16 @@ private fun ActionArea(
                 Button(onClick = onSave, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.save)) }
                 Button(onClick = onShare, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.share)) }
             }
+            saveImageButton(Modifier.fillMaxWidth())
             OutlinedButton(onClick = onStartOver, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.start_over))
             }
         }
-        else -> Button(onClick = onGenerate, enabled = state.preview != null, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.generate))
+        else -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = onGenerate, enabled = state.preview != null, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.generate))
+            }
+            saveImageButton(Modifier.fillMaxWidth())
         }
     }
 }

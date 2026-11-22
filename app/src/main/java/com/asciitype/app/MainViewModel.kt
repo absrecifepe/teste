@@ -51,6 +51,7 @@ data class UiState(
     val settings: Settings = Settings(),
     val preview: Bitmap? = null,
     val exporting: Boolean = false,
+    val savingImage: Boolean = false,
     val progress: Float = 0f,
     val video: VideoResult? = null,
     @StringRes val message: Int? = null,
@@ -187,6 +188,55 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 }.isSuccess
             }
             _state.update { it.copy(message = if (ok) R.string.msg_saved else R.string.msg_save_error) }
+        }
+    }
+
+    /** Salva a figura ASCII completa em PNG de alta resolução em Imagens/ASCII Typer. */
+    fun saveImage() {
+        val src = source ?: return
+        if (_state.value.savingImage) return
+        val s = _state.value.settings
+        _state.update { it.copy(savingImage = true) }
+        viewModelScope.launch {
+            val ok = withContext(Dispatchers.Default) {
+                runCatching {
+                    val layout = FrameLayout.compute(src.width, src.height, s.columns, 2048, 3640)
+                    val art = AsciiConverter.fillWithText(convert(src, layout, s), s.headerText)
+                    val renderer = AsciiRenderer(art, layout, s.style)
+                    val bmp = try { renderer.renderFinal() } finally { renderer.release() }
+                    try {
+                        withContext(Dispatchers.IO) { writeImage(bmp) }
+                    } finally {
+                        bmp.recycle()
+                    }
+                }.isSuccess
+            }
+            _state.update {
+                it.copy(savingImage = false, message = if (ok) R.string.msg_image_saved else R.string.msg_save_error)
+            }
+        }
+    }
+
+    private fun writeImage(bmp: Bitmap) {
+        val resolver = getApplication<Application>().contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "ascii_${System.currentTimeMillis()}.png")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/ASCII Typer")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val uri = resolver.insert(collection, values) ?: error("insert falhou")
+        try {
+            resolver.openOutputStream(uri)!!.use { os ->
+                check(bmp.compress(Bitmap.CompressFormat.PNG, 100, os)) { "compress falhou" }
+            }
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+        } catch (e: Exception) {
+            resolver.delete(uri, null, null)
+            throw e
         }
     }
 

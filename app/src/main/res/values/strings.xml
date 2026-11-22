@@ -40,4 +40,7 @@
     <string name="setting_text">Texto que forma a imagem (opcional)</string>
     <string name="setting_text_hint">Ex.: Feliz aniversário, Ana!</string>
     <string name="setting_zoom">Começar com zoom nas letras</string>
+    <string name="save_image">Salvar imagem</string>
+    <string name="saving_image">Salvando imagem…</string>
+    <string name="msg_image_saved">Imagem salva em Imagens/ASCII Typer</string>
 </resources>
