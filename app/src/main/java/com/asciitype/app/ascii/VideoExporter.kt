@@ -24,15 +24,15 @@ object VideoExporter {
     /** Larguras tentadas, da maior para a menor, até achar uma suportada pelo codificador. */
     private val CANDIDATE_WIDTHS = intArrayOf(1080, 720, 640, 480)
 
-    fun chooseLayout(imgW: Int, imgH: Int, cols: Int): FrameLayout {
+    fun chooseLayout(imgW: Int, imgH: Int, cols: Int, extraRows: Int = 0): FrameLayout {
         val caps = MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos
             .filter { it.isEncoder && it.supportedTypes.any { t -> t.equals(MIME, true) } }
             .mapNotNull { runCatching { it.getCapabilitiesForType(MIME).videoCapabilities }.getOrNull() }
         for (w in CANDIDATE_WIDTHS) {
-            val layout = FrameLayout.compute(imgW, imgH, cols, w, w * 16 / 9)
+            val layout = FrameLayout.compute(imgW, imgH, cols, w, w * 16 / 9, extraRows)
             if (caps.isEmpty() || caps.any { it.isSizeSupported(layout.width, layout.height) }) return layout
         }
-        return FrameLayout.compute(imgW, imgH, cols, 480, 854)
+        return FrameLayout.compute(imgW, imgH, cols, 480, 854, extraRows)
     }
 
     suspend fun export(
@@ -69,7 +69,7 @@ object VideoExporter {
             val total = timeline.totalFrames
             for (f in 0 until total) {
                 currentCoroutineContext().ensureActive()
-                renderer.renderFrame(timeline.revealedAt(f), timeline.cursorAt(f), frame)
+                renderer.renderFrame(timeline.revealedAt(f), timeline.cursorAt(f), timeline.zoomAt(f), frame)
                 frame.getPixels(argb, 0, w, 0, 0, w, h)
 
                 val inIndex = dequeueInput(codec, drainer)

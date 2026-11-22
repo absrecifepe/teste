@@ -37,6 +37,10 @@ data class Settings(
     val style: ColorStyle = ColorStyle.PAPER,
     val typingSeconds: Int = 8,
     val invert: Boolean = false,
+    /** Texto digitado no começo do vídeo, no topo da imagem. */
+    val headerText: String = "",
+    /** Começa com a câmera aproximada e vai se afastando. */
+    val zoomIntro: Boolean = true,
 )
 
 data class VideoResult(val file: File, val width: Int, val height: Int)
@@ -97,8 +101,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         previewJob?.cancel()
         previewJob = viewModelScope.launch(Dispatchers.Default) {
             if (!immediate) delay(150)
-            val layout = FrameLayout.compute(src.width, src.height, s.columns, 540, 960)
-            val art = convert(src, layout, s)
+            val header = AsciiConverter.wrapHeader(s.headerText, s.columns)
+            val layout = FrameLayout.compute(
+                src.width, src.height, s.columns, 540, 960, AsciiConverter.headerRows(header),
+            )
+            val art = AsciiConverter.withHeader(convert(src, layout, s), header)
             val renderer = AsciiRenderer(art, layout, s.style)
             val bmp = renderer.renderFinal()
             renderer.release()
@@ -115,10 +122,21 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 val result = withContext(Dispatchers.Default) {
                     videoDir.listFiles()?.forEach { it.delete() }
-                    val layout = VideoExporter.chooseLayout(src.width, src.height, s.columns)
-                    val art = convert(src, layout, s)
+                    val header = AsciiConverter.wrapHeader(s.headerText, s.columns)
+                    val layout = VideoExporter.chooseLayout(
+                        src.width, src.height, s.columns, AsciiConverter.headerRows(header),
+                    )
+                    val art = AsciiConverter.withHeader(convert(src, layout, s), header)
                     val renderer = AsciiRenderer(art, layout, s.style)
-                    val timeline = Timeline(renderer.typedCount, s.typingSeconds.toFloat())
+                    val imageChars = renderer.typedCount - art.headerCount
+                    // Introdução lenta: o texto inteiro + algumas linhas da foto (se houver zoom).
+                    val intro = art.headerCount + if (s.zoomIntro) minOf(imageChars / 15, 90) else 0
+                    val timeline = Timeline(
+                        totalChars = renderer.typedCount,
+                        introChars = intro,
+                        typingSeconds = s.typingSeconds.toFloat(),
+                        maxZoom = if (s.zoomIntro) (s.columns / 28f).coerceIn(1.8f, 5f) else 1f,
+                    )
                     val out = File(videoDir, "ascii_${System.currentTimeMillis()}.mp4")
                     try {
                         VideoExporter.export(renderer, layout, timeline, out) { p ->
@@ -208,7 +226,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     private fun convert(src: Bitmap, layout: FrameLayout, s: Settings) = AsciiConverter.convert(
         src = src,
         cols = layout.cols,
-        rows = layout.rows,
+        rows = layout.imageRows,
         charset = s.charset,
         denseIsDark = s.style.denseIsDark != s.invert,
     )

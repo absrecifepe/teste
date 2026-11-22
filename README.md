@@ -10,6 +10,10 @@ em caracteres ASCII**, como num terminal, com cursor piscando.
 - Ajustes: nível de detalhe (30–160 colunas), duração da digitação (3–30 s), 5 estilos de cor
   (Branco — padrão, Matrix, Terminal, Colorido, Âmbar), 4 conjuntos de caracteres (Clássico, Detalhado,
   Blocos, Binário) e inversão claro/escuro.
+- **Zoom de abertura:** o vídeo começa com a câmera bem perto das letras sendo digitadas, seguindo
+  o cursor; depois de algumas linhas a digitação acelera e a câmera se afasta até mostrar a foto toda.
+- **Texto de abertura (opcional, até 80 caracteres):** digitado primeiro e centralizado no topo,
+  fazendo parte da imagem final.
 - Pré-visualização instantânea do resultado final.
 - Gera MP4 H.264 a 30 fps direto no aparelho (MediaCodec, sem bibliotecas externas), com até 1080 px de largura.
 - Salva em `Filmes/ASCII Typer` ou compartilha direto (WhatsApp, Instagram, TikTok…).

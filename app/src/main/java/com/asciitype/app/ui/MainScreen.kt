@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -30,6 +31,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
@@ -100,6 +102,7 @@ fun MainScreen(vm: MainViewModel) {
             Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -252,6 +255,26 @@ private fun ActionArea(
 @Composable
 private fun SettingsPanel(settings: Settings, enabled: Boolean, onChange: ((Settings) -> Settings) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = settings.headerText,
+            onValueChange = { v -> onChange { it.copy(headerText = v.take(MAX_HEADER)) } },
+            label = { Text(stringResource(R.string.setting_text)) },
+            placeholder = { Text(stringResource(R.string.setting_text_hint)) },
+            supportingText = { Text("${settings.headerText.length}/$MAX_HEADER") },
+            enabled = enabled,
+            maxLines = 3,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Label(stringResource(R.string.setting_zoom), Modifier.weight(1f))
+            Switch(
+                checked = settings.zoomIntro,
+                onCheckedChange = { v -> onChange { it.copy(zoomIntro = v) } },
+                enabled = enabled,
+            )
+        }
+
         Label(stringResource(R.string.setting_detail, settings.columns))
         Slider(
             value = settings.columns.toFloat(),
@@ -307,6 +330,8 @@ private fun SettingsPanel(settings: Settings, enabled: Boolean, onChange: ((Sett
 private fun Label(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.titleSmall, modifier = modifier)
 }
+
+private const val MAX_HEADER = 80
 
 private val LOGO = """
    _   ___  ___ ___ ___
