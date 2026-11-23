@@ -44,5 +44,22 @@
     <string name="saving_image">Salvando imagem…</string>
     <string name="msg_image_saved">Imagem salva em Imagens/ASCII Typer</string>
     <string name="setting_typing_sound">Som de digitação</string>
-    <string name="setting_music">Música (quando o zoom se afasta)</string>
+    <string name="msg_music_error">Não foi possível ler essa música.</string>
+    <string name="music_calm">Calma</string>
+    <string name="music_upbeat">Animada</string>
+    <string name="music_lofi">Lo-fi</string>
+    <string name="music_suspense">Suspense</string>
+    <string name="section_text">Texto</string>
+    <string name="section_look">Aparência</string>
+    <string name="section_animation">Animação</string>
+    <string name="section_sound">Som</string>
+    <string name="music_label">Música</string>
+    <string name="music_none">Nenhuma</string>
+    <string name="music_generated">Do app</string>
+    <string name="music_custom">Minha música</string>
+    <string name="music_variation">Cada vídeo ganha uma variação diferente do estilo escolhido.</string>
+    <string name="pick_music">Escolher música</string>
+    <string name="change_music">Trocar música</string>
+    <string name="music_start">Começar a música em %1$s</string>
+    <string name="music_copyright">Músicas comerciais podem ser silenciadas ou bloqueadas pelo Instagram, TikTok e YouTube.</string>
 </resources>

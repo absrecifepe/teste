@@ -42,5 +42,22 @@
     <string name="saving_image">Saving image…</string>
     <string name="msg_image_saved">Image saved to Pictures/ASCII Typer</string>
     <string name="setting_typing_sound">Typing sound</string>
-    <string name="setting_music">Music (as the zoom pulls out)</string>
+    <string name="msg_music_error">Could not read this music file.</string>
+    <string name="music_calm">Calm</string>
+    <string name="music_upbeat">Upbeat</string>
+    <string name="music_lofi">Lo-fi</string>
+    <string name="music_suspense">Suspense</string>
+    <string name="section_text">Text</string>
+    <string name="section_look">Look</string>
+    <string name="section_animation">Animation</string>
+    <string name="section_sound">Sound</string>
+    <string name="music_label">Music</string>
+    <string name="music_none">None</string>
+    <string name="music_generated">App</string>
+    <string name="music_custom">My music</string>
+    <string name="music_variation">Each video gets a different variation of the chosen style.</string>
+    <string name="pick_music">Pick music</string>
+    <string name="change_music">Change music</string>
+    <string name="music_start">Start the music at %1$s</string>
+    <string name="music_copyright">Commercial songs may be muted or blocked by Instagram, TikTok and YouTube.</string>
 </resources>

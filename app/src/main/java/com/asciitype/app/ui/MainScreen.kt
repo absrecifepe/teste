@@ -10,8 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -27,21 +25,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,11 +49,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.asciitype.app.MainViewModel
 import com.asciitype.app.R
-import com.asciitype.app.Settings
 import com.asciitype.app.UiState
 import com.asciitype.app.VideoResult
-import com.asciitype.app.ascii.Charset
-import com.asciitype.app.ascii.ColorStyle
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,7 +95,7 @@ fun MainScreen(vm: MainViewModel) {
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (!state.hasPhoto) {
                 EmptyState(loading = state.loadingPhoto, onPick = pickPhoto)
@@ -122,8 +112,10 @@ fun MainScreen(vm: MainViewModel) {
                 )
                 SettingsPanel(
                     settings = state.settings,
+                    customMusic = state.customMusic,
                     enabled = !state.exporting,
                     onChange = vm::updateSettings,
+                    onMusicPicked = vm::onMusicPicked,
                 )
                 OutlinedButton(onClick = pickPhoto, enabled = !state.exporting, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.change_photo))
@@ -261,105 +253,6 @@ private fun ActionArea(
         }
     }
 }
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun SettingsPanel(settings: Settings, enabled: Boolean, onChange: ((Settings) -> Settings) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = settings.headerText,
-            onValueChange = { v -> onChange { it.copy(headerText = v.take(MAX_HEADER)) } },
-            label = { Text(stringResource(R.string.setting_text)) },
-            placeholder = { Text(stringResource(R.string.setting_text_hint)) },
-            supportingText = { Text("${settings.headerText.length}/$MAX_HEADER") },
-            enabled = enabled,
-            maxLines = 3,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Label(stringResource(R.string.setting_zoom), Modifier.weight(1f))
-            Switch(
-                checked = settings.zoomIntro,
-                onCheckedChange = { v -> onChange { it.copy(zoomIntro = v) } },
-                enabled = enabled,
-            )
-        }
-
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Label(stringResource(R.string.setting_typing_sound), Modifier.weight(1f))
-            Switch(
-                checked = settings.typingSound,
-                onCheckedChange = { v -> onChange { it.copy(typingSound = v) } },
-                enabled = enabled,
-            )
-        }
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Label(stringResource(R.string.setting_music), Modifier.weight(1f))
-            Switch(
-                checked = settings.music,
-                onCheckedChange = { v -> onChange { it.copy(music = v) } },
-                enabled = enabled,
-            )
-        }
-
-        Label(stringResource(R.string.setting_detail, settings.columns))
-        Slider(
-            value = settings.columns.toFloat(),
-            onValueChange = { v -> onChange { it.copy(columns = v.roundToInt()) } },
-            valueRange = 30f..160f,
-            enabled = enabled,
-        )
-
-        Label(stringResource(R.string.setting_duration, settings.typingSeconds))
-        Slider(
-            value = settings.typingSeconds.toFloat(),
-            onValueChange = { v -> onChange { it.copy(typingSeconds = v.roundToInt()) } },
-            valueRange = 3f..30f,
-            enabled = enabled,
-        )
-
-        Label(stringResource(R.string.setting_style))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            ColorStyle.entries.forEach { style ->
-                FilterChip(
-                    selected = settings.style == style,
-                    onClick = { onChange { it.copy(style = style) } },
-                    label = { Text(stringResource(style.label)) },
-                    enabled = enabled,
-                )
-            }
-        }
-
-        Label(stringResource(R.string.setting_charset))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Charset.entries.forEach { cs ->
-                FilterChip(
-                    selected = settings.charset == cs,
-                    onClick = { onChange { it.copy(charset = cs) } },
-                    label = { Text(stringResource(cs.label)) },
-                    enabled = enabled,
-                )
-            }
-        }
-
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Label(stringResource(R.string.setting_invert), Modifier.weight(1f))
-            Switch(
-                checked = settings.invert,
-                onCheckedChange = { v -> onChange { it.copy(invert = v) } },
-                enabled = enabled,
-            )
-        }
-    }
-}
-
-@Composable
-private fun Label(text: String, modifier: Modifier = Modifier) {
-    Text(text, style = MaterialTheme.typography.titleSmall, modifier = modifier)
-}
-
-private const val MAX_HEADER = 80
 
 private val LOGO = """
    _   ___  ___ ___ ___

@@ -13,8 +13,12 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.asciitype.app.ascii.AsciiConverter
+import com.asciitype.app.audio.AudioDecoder
 import com.asciitype.app.audio.AudioEncoder
 import com.asciitype.app.audio.AudioSynth
+import com.asciitype.app.audio.MusicSource
+import com.asciitype.app.audio.MusicStyle
+import android.provider.OpenableColumns
 import com.asciitype.app.ascii.AsciiRenderer
 import com.asciitype.app.ascii.Charset
 import com.asciitype.app.ascii.ColorStyle
@@ -44,8 +48,22 @@ data class Settings(
     /** Começa com a câmera aproximada e vai se afastando. */
     val zoomIntro: Boolean = true,
     val typingSound: Boolean = true,
-    val music: Boolean = true,
-)
+    val musicMode: MusicMode = MusicMode.GENERATED,
+    val musicStyle: MusicStyle = MusicStyle.CALM,
+    /** Segundo da música do usuário a partir do qual ela toca. */
+    val musicStartSec: Int = 0,
+) {
+    /** Mudanças só de som não precisam refazer a prévia da imagem. */
+    fun sameVisual(o: Settings) = copy(
+        typingSound = o.typingSound, musicMode = o.musicMode, musicStyle = o.musicStyle,
+        musicStartSec = o.musicStartSec, typingSeconds = o.typingSeconds, zoomIntro = o.zoomIntro,
+    ) == o
+}
+
+enum class MusicMode { NONE, GENERATED, CUSTOM }
+
+/** Música escolhida pelo usuário. */
+data class CustomMusic(val uri: Uri, val name: String, val durationSec: Float)
 
 data class VideoResult(val file: File, val width: Int, val height: Int)
 
@@ -58,6 +76,7 @@ data class UiState(
     val savingImage: Boolean = false,
     val progress: Float = 0f,
     val video: VideoResult? = null,
+    val customMusic: CustomMusic? = null,
     @StringRes val message: Int? = null,
 )
 
@@ -96,8 +115,36 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val new = transform(_state.value.settings)
         if (new == _state.value.settings) return
         exportJob?.cancel()
+        val old = _state.value.settings
         _state.update { it.copy(settings = new, video = null, exporting = false) }
-        refreshPreview(immediate = false)
+        if (!old.sameVisual(new)) refreshPreview(immediate = false)
+    }
+
+    /** Música escolhida no seletor de arquivos do Android. */
+    fun onMusicPicked(uri: Uri) {
+        viewModelScope.launch {
+            val app = getApplication<Application>()
+            val music = withContext(Dispatchers.IO) {
+                runCatching {
+                    val name = app.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                        ?.use { c -> if (c.moveToFirst()) c.getString(0) else null } ?: "música"
+                    CustomMusic(uri, name, AudioDecoder.durationSeconds(app, uri))
+                }.getOrNull()
+            }
+            if (music == null) {
+                _state.update { it.copy(message = R.string.msg_music_error) }
+                return@launch
+            }
+            exportJob?.cancel()
+            _state.update {
+                it.copy(
+                    customMusic = music,
+                    settings = it.settings.copy(musicMode = MusicMode.CUSTOM, musicStartSec = 0),
+                    video = null,
+                    exporting = false,
+                )
+            }
+        }
     }
 
     private fun refreshPreview(immediate: Boolean) {
@@ -119,6 +166,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         val src = source ?: return
         if (_state.value.exporting) return
         val s = _state.value.settings
+        val custom = _state.value.customMusic
         exportJob = viewModelScope.launch {
             _state.update { it.copy(exporting = true, progress = 0f, video = null) }
             try {
@@ -141,8 +189,21 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     )
                     val out = File(videoDir, "ascii_${System.currentTimeMillis()}.mp4")
                     try {
-                        val audio = if (s.typingSound || s.music) {
-                            AudioEncoder.encode(AudioSynth.render(timeline, s.typingSound, s.music))
+                        val music: MusicSource = when (s.musicMode) {
+                            MusicMode.NONE -> MusicSource.None
+                            // Semente nova a cada vídeo: cada geração tem uma música diferente.
+                            MusicMode.GENERATED -> MusicSource.Generated(s.musicStyle, System.nanoTime())
+                            MusicMode.CUSTOM -> custom?.let {
+                                MusicSource.Custom(
+                                    AudioDecoder.decodeMono(
+                                        getApplication(), it.uri, s.musicStartSec.toFloat(),
+                                        AudioSynth.musicSecondsNeeded(timeline),
+                                    ),
+                                )
+                            } ?: MusicSource.None
+                        }
+                        val audio = if (s.typingSound || music !is MusicSource.None) {
+                            AudioEncoder.encode(AudioSynth.render(timeline, s.typingSound, music))
                         } else {
                             null
                         }
