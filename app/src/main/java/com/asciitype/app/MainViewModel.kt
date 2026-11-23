@@ -13,6 +13,8 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.asciitype.app.ascii.AsciiConverter
+import com.asciitype.app.audio.AudioEncoder
+import com.asciitype.app.audio.AudioSynth
 import com.asciitype.app.ascii.AsciiRenderer
 import com.asciitype.app.ascii.Charset
 import com.asciitype.app.ascii.ColorStyle
@@ -41,6 +43,8 @@ data class Settings(
     val headerText: String = "",
     /** Começa com a câmera aproximada e vai se afastando. */
     val zoomIntro: Boolean = true,
+    val typingSound: Boolean = true,
+    val music: Boolean = true,
 )
 
 data class VideoResult(val file: File, val width: Int, val height: Int)
@@ -137,7 +141,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     )
                     val out = File(videoDir, "ascii_${System.currentTimeMillis()}.mp4")
                     try {
-                        VideoExporter.export(renderer, layout, timeline, out) { p ->
+                        val audio = if (s.typingSound || s.music) {
+                            AudioEncoder.encode(AudioSynth.render(timeline, s.typingSound, s.music))
+                        } else {
+                            null
+                        }
+                        VideoExporter.export(renderer, layout, timeline, out, audio) { p ->
                             _state.update { it.copy(progress = p) }
                         }
                     } catch (e: Throwable) {

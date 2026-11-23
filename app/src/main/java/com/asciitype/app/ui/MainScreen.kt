@@ -286,6 +286,23 @@ private fun SettingsPanel(settings: Settings, enabled: Boolean, onChange: ((Sett
             )
         }
 
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Label(stringResource(R.string.setting_typing_sound), Modifier.weight(1f))
+            Switch(
+                checked = settings.typingSound,
+                onCheckedChange = { v -> onChange { it.copy(typingSound = v) } },
+                enabled = enabled,
+            )
+        }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Label(stringResource(R.string.setting_music), Modifier.weight(1f))
+            Switch(
+                checked = settings.music,
+                onCheckedChange = { v -> onChange { it.copy(music = v) } },
+                enabled = enabled,
+            )
+        }
+
         Label(stringResource(R.string.setting_detail, settings.columns))
         Slider(
             value = settings.columns.toFloat(),

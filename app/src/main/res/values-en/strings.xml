@@ -41,4 +41,6 @@
     <string name="save_image">Save image</string>
     <string name="saving_image">Saving image…</string>
     <string name="msg_image_saved">Image saved to Pictures/ASCII Typer</string>
+    <string name="setting_typing_sound">Typing sound</string>
+    <string name="setting_music">Music (as the zoom pulls out)</string>
 </resources>

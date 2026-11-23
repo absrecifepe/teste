@@ -7,6 +7,8 @@ import android.media.MediaCodecInfo
 import android.media.MediaCodecList
 import android.media.MediaFormat
 import android.media.MediaMuxer
+import com.asciitype.app.audio.EncodedAudio
+import java.nio.ByteBuffer
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import java.io.File
@@ -40,6 +42,7 @@ object VideoExporter {
         layout: FrameLayout,
         timeline: Timeline,
         out: File,
+        audio: EncodedAudio?,
         onProgress: (Float) -> Unit,
     ) {
         val w = layout.width
@@ -64,7 +67,7 @@ object VideoExporter {
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             codec.start()
             muxer = MediaMuxer(out.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-            val drainer = Drainer(codec, muxer)
+            val drainer = Drainer(codec, muxer, audio)
 
             val total = timeline.totalFrames
             for (f in 0 until total) {
@@ -82,6 +85,7 @@ object VideoExporter {
             val inIndex = dequeueInput(codec, drainer)
             codec.queueInputBuffer(inIndex, 0, 0, timeline.ptsUs(total), MediaCodec.BUFFER_FLAG_END_OF_STREAM)
             drainer.drain(endOfStream = true)
+            drainer.writeAudioUpTo(Long.MAX_VALUE)
         } finally {
             frame.recycle()
             runCatching { codec.stop() }
@@ -99,9 +103,27 @@ object VideoExporter {
         }
     }
 
-    private class Drainer(private val codec: MediaCodec, private val muxer: MediaMuxer) {
+    private class Drainer(
+        private val codec: MediaCodec,
+        private val muxer: MediaMuxer,
+        private val audio: EncodedAudio?,
+    ) {
         private val info = MediaCodec.BufferInfo()
         private var track = -1
+        private var audioTrack = -1
+        private var audioPos = 0
+        private val audioInfo = MediaCodec.BufferInfo()
+
+        /** Grava as amostras de áudio até [ptsUs], intercalando com o vídeo. */
+        fun writeAudioUpTo(ptsUs: Long) {
+            val a = audio ?: return
+            if (audioTrack < 0) return
+            while (audioPos < a.samples.size && a.samples[audioPos].ptsUs <= ptsUs) {
+                val s = a.samples[audioPos++]
+                audioInfo.set(0, s.data.size, s.ptsUs, s.flags and MediaCodec.BUFFER_FLAG_END_OF_STREAM.inv())
+                muxer.writeSampleData(audioTrack, ByteBuffer.wrap(s.data), audioInfo)
+            }
+        }
 
         fun drain(endOfStream: Boolean) {
             var idleTries = 0
@@ -115,12 +137,14 @@ object VideoExporter {
                     idx == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
                         check(track < 0) { "Formato mudou duas vezes" }
                         track = muxer.addTrack(codec.outputFormat)
+                        if (audio != null) audioTrack = muxer.addTrack(audio.format)
                         muxer.start()
                     }
                     idx >= 0 -> {
                         val buf = codec.getOutputBuffer(idx)!!
                         if (info.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG != 0) info.size = 0
                         if (info.size > 0 && track >= 0) {
+                            writeAudioUpTo(info.presentationTimeUs)
                             buf.position(info.offset)
                             buf.limit(info.offset + info.size)
                             muxer.writeSampleData(track, buf, info)

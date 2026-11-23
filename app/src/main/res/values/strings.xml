@@ -43,4 +43,6 @@
     <string name="save_image">Salvar imagem</string>
     <string name="saving_image">Salvando imagem…</string>
     <string name="msg_image_saved">Imagem salva em Imagens/ASCII Typer</string>
+    <string name="setting_typing_sound">Som de digitação</string>
+    <string name="setting_music">Música (quando o zoom se afasta)</string>
 </resources>

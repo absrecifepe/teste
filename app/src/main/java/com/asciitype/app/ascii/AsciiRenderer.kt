@@ -277,6 +277,12 @@ class Timeline(
     private val holdFrames = (holdSeconds * fps).roundToInt()
     val totalFrames = leadFrames + introFrames + mainFrames + holdFrames
 
+    /** Quadro em que termina a introdução lenta (começa o afastamento do zoom). */
+    val introEndFrame = leadFrames + introFrames
+
+    /** Quadro em que toda a figura já foi digitada. */
+    val mainEndFrame = introEndFrame + mainFrames
+
     /** Peso da parte linear da digitação principal, para começar na velocidade da introdução. */
     private val linearWeight: Float = run {
         val rest = totalChars - this.introChars
